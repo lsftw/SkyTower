@@ -1,15 +1,16 @@
 import pygame
 import time
 import sys
+import numpy
 
 running = True
 startTime = time.time()
 
 def handleEvents():
 	global running
-	for event in pygame.event.get():  # go through every event that frame.
+	for event in pygame.event.get():
 		if event.type == pygame.QUIT:
-			running = False  # if the user tries to quit the app, set running to false in order to exit the loop
+			running = False
 
 # yoyo transition: goes from start to end, then from end to start
 def getCurrentTransitionColor(startColor, endColor, transitionTime):
@@ -20,8 +21,8 @@ def getCurrentTransitionColor(startColor, endColor, transitionTime):
 	transitionMultiplier %= 1
 	if invertTransition:
 		transitionMultiplier = 1 - transitionMultiplier
-	curColor = endColor[0] - startColor[0], endColor[1] - startColor[1], endColor[2] - startColor[2]
-	curColor = curColor[0]*transitionMultiplier, curColor[1]*transitionMultiplier, curColor[2]*transitionMultiplier
+	curColor = numpy.subtract(endColor, startColor)
+	curColor = numpy.multiply(curColor, transitionMultiplier)
 	return curColor
 
 def drawGame(screen):
