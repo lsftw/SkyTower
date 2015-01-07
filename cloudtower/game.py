@@ -3,19 +3,32 @@ import time
 import sys
 import numpy
 
+from gamestate import *
+from container import *
+from entity import *
+from player import *
+
 running = True
-startTime = time.time()
+gameState = GameState()
+
+def userQuit():
+	global running
+	running = False
+
+def handleKeyUp(key):
+	gameState.handleKeyUp(key)
 
 def handleEvents():
-	global running
 	for event in pygame.event.get():
 		if event.type == pygame.QUIT:
-			running = False
+			userQuit()
+		if event.type == pygame.KEYUP:
+			handleKeyUp(event.key)
 
 # yoyo transition: goes from start to end, then from end to start
 def getCurrentTransitionColor(startColor, endColor, transitionTime):
 	curTime = time.time()
-	timePassedInSeconds = curTime - startTime
+	timePassedInSeconds = curTime - gameState.startTime
 	transitionMultiplier = timePassedInSeconds / transitionTime
 	invertTransition = int(transitionMultiplier) % 2 == 1
 	transitionMultiplier %= 1
@@ -32,23 +45,30 @@ def drawGame(screen):
 	TRANSITION_TIME_SECONDS = 10
 	curColor = getCurrentTransitionColor(black, white, TRANSITION_TIME_SECONDS)
 	screen.fill(curColor)
+	gameState.draw(screen)
 	pygame.display.flip()
 
 def gameLoop(screen):
 	while running:
 		handleEvents()
+		gameState.tick()
 		drawGame(screen)
 	sys.exit()
 
-def initGame():
+def initDisplay():
 	pygame.init()
 	window_size = (800, 600)
 	screen = pygame.display.set_mode(window_size)
 	pygame.display.set_caption("Cloud Tower")
 	return screen
 
+def initGame():
+	gameState.addPlayer(Player(50, 50, 20, 60))
+
 def startGame():
-	screen = initGame()
+	screen = initDisplay()
+	initGame()
 	gameLoop(screen)
 
-startGame()
+if __name__ == "__main__":
+	startGame()
