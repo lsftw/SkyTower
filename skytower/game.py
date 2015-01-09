@@ -9,6 +9,8 @@ from entity import *
 from player import *
 
 windowSize = (800, 600)
+backgroundColor = 128, 128, 128
+
 running = True
 gameState = GameState(windowSize)
 
@@ -33,26 +35,8 @@ def handleEvents():
 		if event.type == pygame.KEYUP:
 			handleKeyUp(event.key)
 
-# yoyo transition: goes from start to end, then from end to start
-def getCurrentTransitionColor(startColor, endColor, transitionTime):
-	curTime = time.time()
-	timePassedInSeconds = curTime - gameState.startTime
-	transitionMultiplier = timePassedInSeconds / transitionTime
-	invertTransition = int(transitionMultiplier) % 2 == 1
-	transitionMultiplier %= 1
-	if invertTransition:
-		transitionMultiplier = 1 - transitionMultiplier
-	curColor = numpy.subtract(endColor, startColor)
-	curColor = numpy.multiply(curColor, transitionMultiplier)
-	return curColor
-
 def drawGame(screen):
-	# gradually turn screen from black to white then back to black
-	black = 0, 0, 0
-	white = 255, 255, 255
-	TRANSITION_TIME_SECONDS = 10
-	curColor = getCurrentTransitionColor(black, white, TRANSITION_TIME_SECONDS)
-	screen.fill(curColor)
+	screen.fill(backgroundColor)
 	gameState.draw(screen)
 	pygame.display.flip()
 
