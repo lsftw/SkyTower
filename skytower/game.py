@@ -59,7 +59,7 @@ def initDisplay():
 	pygame.init()
 	window_size = (800, 600)
 	screen = pygame.display.set_mode(window_size)
-	pygame.display.set_caption("Cloud Tower")
+	pygame.display.set_caption("Sky Tower")
 	return screen
 
 def initGame():
