@@ -3,21 +3,27 @@ import time
 from container import *
 
 class GameState:
-	container = Container()
+	container = None
 	player = None
-	startTime = time.time()
+	startTime = 0
 	lastTickTime = startTime
-	def addPlayer(self, player):
+	def __init__(self):
+		self.container = Container(800, 600)
+		self.startTime = time.time()
+		self.lastTickTime = self.startTime
+	def addPlayer(self, player): # players have keyboard controls and are followed by the camera
 		self.player = player
 		self.addEntity(player)
+		self.container.cameraFollow(player)
 	def addEntity(self, entity):
 		self.container.addEntity(entity)
 	def handleKeyUp(self, key):
 		self.player.handleKeyUp(key)
-	def tick(self):
+	# called every frame
+	def update(self):
 		curTime = time.time()
 		deltaSeconds = curTime - self.lastTickTime
 		self.lastTickTime = curTime
-		self.container.tick(deltaSeconds)
+		self.container.update(deltaSeconds)
 	def draw(self, screen):
 		self.container.draw(screen)

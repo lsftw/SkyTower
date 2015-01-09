@@ -1,49 +1,70 @@
-# tick() to update game logic, draw() to redraw game state, repeat
+# update() to update game logic, draw() to redraw game state, repeat
 import pygame
 from pygame import Rect
 
+# TODO split up functionality into separate classes
+
 class Entity:
-	_exactPositions = [-1, -1] # Uses floats to handle variable-deltaSecond frames, Rect is integer only
-	_hitbox = Rect(-1, -1, -1, -1) # should match exactPositions for first 2 values
-	velocities = [0, 0]
+	_exactPositions = None # Uses floats to handle variable-deltaSecond frames, Rect is integer only
+	_hitbox = None # should match exactPositions for (x, y), but using integers instead
+	velocities = None
 	container = None
+	gravity = True
+	canJumpThrough = False # platforms can be jumped through from below
 	def __init__(self, x, y, width, height):
 		self._exactPositions = [x, y]
 		self._hitbox = Rect(x, y, width, height)
+		self.velocities = [0, 0]
+	# Helper functions for legibility, positions are all using float values
 	def getWidth(self):
-		return self._hitbox[2]
+		return self._hitbox.width
 	def getHeight(self):
-		return self._hitbox[3]
+		return self._hitbox.height
+	def getLeft(self):
+		return self._exactPositions[0]
+	def getRight(self):
+		return self._exactPositions[0] + self.getWidth()
+	def getTop(self):
+		return self._exactPositions[1]
+	def getBottom(self):
+		return self._exactPositions[1] + self.getHeight()
+	def getCenter(self):
+		centerX = (self.getLeft() + self.getRight()) / 2
+		centerY = (self.getTop() + self.getBottom()) / 2
+		return (centerX, centerY)
 	def setVelocityX(self, velocity):
 		self.velocities[0] = velocity
 	def setVelocityY(self, velocity):
 		self.velocities[1] = velocity
-	def getLeft(self):
-		return self._exactPositions[0]
-	def getRight(self):
-		return self._exactPositions[0] + self._hitbox[2]
-	def getTop(self):
-		return self._exactPositions[1]
-	def getBottom(self):
-		return self._exactPositions[1] + self._hitbox[3]
+	# Interactions with other Entity instances
+	def isAboveEntity(self, other):
+		return self.getBottom() >= other.getTop()
+	# Hitbox modifications: all return old hitbox
+	def getDisplayedHitbox(self): # use these position & dimensions for display on screen
+		#print(self._hitbox, self.container.camera.view(self._hitbox))
+		return self.container.camera.view(self._hitbox)
 	def updateHitbox(self):
+		oldHitbox = self._hitbox.copy()
 		intX = int(self._exactPositions[0])
 		intY = int(self._exactPositions[1])
 		self._hitbox[0] = intX
 		self._hitbox[1] = intY
+		return oldHitbox
 	def setPosition(self, x, y):
 		self._exactPositions = [x, y]
-		self.updateHitbox()
+		return self.updateHitbox()
 	def setSize(self, width, height):
+		oldHitbox = self._hitbox.copy()
 		self._hitbox[2] = width
 		self._hitbox[3] = height
+		return oldHitbox
 	def move(self, deltaX, deltaY):
 		self._exactPositions[0] += deltaX
 		self._exactPositions[1] += deltaY
-		self.updateHitbox()
+		return self.updateHitbox()
 	# Time-based
 	def getGravity(self, deltaSeconds):
-		if self.container is None:
+		if self.container is None or not self.gravity:
 			return 0
 		# TODO cannot just multiply acceleration, would be less accurate as deltaSeconds increase, pos += .5 * a * t^2 instead?
 		return self.container.gravity * deltaSeconds
@@ -75,12 +96,23 @@ class Entity:
 		# update position to be inside bounds
 		self.setPosition(newPositionX, newPositionY)
 	def updatePosition(self, deltaSeconds):
-		self.move(self.velocities[0] * deltaSeconds, self.velocities[1] * deltaSeconds)
+		oldHitbox = self.move(self.velocities[0] * deltaSeconds, self.velocities[1] * deltaSeconds)
 		self.preventMovingOutOfBounds()
+		return oldHitbox
+	def handleCollision(self, selfOldHitbox, other):
+		# TODO collision check
+		pass
+	def handleAllCollisions(self, selfOldHitbox):
+		if self.container is not None:
+			for entity in iter(self.container.entities):
+				if entity is not self:
+					self.handleCollision(selfOldHitbox, entity)
 	def updatePhysics(self, deltaSeconds):
 		self.updateVelocities(deltaSeconds)
-		self.updatePosition(deltaSeconds)
-	def tick(self, deltaSeconds):
+		oldHitbox = self.updatePosition(deltaSeconds)
+		self.handleAllCollisions(oldHitbox)
+	# called by container
+	def update(self, deltaSeconds):
 		self.updatePhysics(deltaSeconds)
 	def draw(self, screen):
-		pygame.draw.rect(screen, (128, 128, 128), self._hitbox)
+		pygame.draw.rect(screen, (128, 128, 128), self.getDisplayedHitbox())

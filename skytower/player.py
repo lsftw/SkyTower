@@ -19,8 +19,8 @@ class Player(Entity):
 			self.setVelocityX(0)
 		if keysPressed[pygame.K_UP]:
 			self.tryToJump()
-	def tick(self, deltaSeconds):
+	def update(self, deltaSeconds):
 		self.handleKeys(deltaSeconds)
-		Entity.tick(self, deltaSeconds)
+		Entity.update(self, deltaSeconds)
 	def handleKeyUp(self, key):
 		pass

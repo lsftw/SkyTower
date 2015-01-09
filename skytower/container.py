@@ -1,17 +1,30 @@
-# Contains Entity objects, tick() draw() repeat
+# Contains Entity objects, update() draw() repeat
+from camera import *
 
 class Container:
-	entities = []
+	entities = None
 	gravity = 500 # accelerationY
-	_boundaries = [0, 0, 800, 600]
+	_boundaries = None
+	camera = None
+	followedEntity = None
+	def __init__(self, width, height):
+		self.entities = []
+		self._boundaries = (0, 0, width, height)
+		self.camera = Camera(width, height)
+	# Entity interaction
 	def addEntity(self, entity):
 		self.entities.append(entity)
 		entity.container = self
-	def tick(self, deltaSeconds):
+	def cameraFollow(self, entity):
+		self.followedEntity = entity
+	# called every frame
+	def update(self, deltaSeconds):
 		for e in iter(self.entities):
-			e.tick(deltaSeconds)
+			e.update(deltaSeconds)
+		if self.followedEntity is not None:
+			self.camera.update(self.followedEntity)
 	def draw(self, screen):
-		for e in iter(self.entities):
+		for e in iter(self.entities): # TODO don't draw out of camera bounds entities
 			e.draw(screen)
 	# spatial boundaries
 	def getLeft(self):

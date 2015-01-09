@@ -15,7 +15,14 @@ def userQuit():
 	global running
 	running = False
 
+def handleSpecialKeys(key):
+	if key == pygame.K_ESCAPE:
+		userQuit()
+	elif key == pygame.K_F4:
+		userQuit()
+
 def handleKeyUp(key):
+	handleSpecialKeys(key)
 	gameState.handleKeyUp(key)
 
 def handleEvents():
@@ -51,7 +58,7 @@ def drawGame(screen):
 def gameLoop(screen):
 	while running:
 		handleEvents()
-		gameState.tick()
+		gameState.update()
 		drawGame(screen)
 	sys.exit()
 
@@ -64,6 +71,9 @@ def initDisplay():
 
 def initGame():
 	gameState.addPlayer(Player(50, 50, 20, 60))
+	other = Entity(400, 300, 10, 10)
+	other.gravity = False
+	gameState.addEntity(other)
 
 def startGame():
 	screen = initDisplay()
