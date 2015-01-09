@@ -8,7 +8,7 @@ class VerticalCamera(Camera):
 		# print(self.viewBounds)
 	def moveVerticallyWithFollowed(self, followedRect):
 		l, _, w, h = self.viewBounds
-		BOTTOM = 0
+		BOTTOM = h
 		t = -followedRect.top + h / 2
 		t = max(BOTTOM, t)
 		return Rect(l, t, w, h)

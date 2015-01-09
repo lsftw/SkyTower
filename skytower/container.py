@@ -9,7 +9,7 @@ class Container:
 	followedEntity = None
 	def __init__(self, width, height):
 		self.entities = []
-		self._boundaries = (0, 0, width, height)
+		self._boundaries = (0, width, -100000, 0)
 		self.camera = VerticalCamera(width, height)
 	# Entity interaction
 	def addEntity(self, entity):
@@ -30,9 +30,9 @@ class Container:
 	def getLeft(self):
 		return self._boundaries[0]
 	def getRight(self):
-		return self._boundaries[2]
-	def getTop(self):
 		return self._boundaries[1]
+	def getTop(self):
+		return self._boundaries[2]
 	def getBottom(self): # TODO later set to 0, after camera centering implemented
 		return self._boundaries[3]
 	def isTooFarLeft(self, entity):

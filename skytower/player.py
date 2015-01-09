@@ -20,7 +20,6 @@ class Player(Entity):
 		if keysPressed[pygame.K_UP]:
 			self.tryToJump()
 	def update(self, deltaSeconds):
-		# print(self._hitbox)
 		self.handleKeys(deltaSeconds)
 		Entity.update(self, deltaSeconds)
 	def handleKeyUp(self, key):
