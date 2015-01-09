@@ -1,2 +1,2 @@
 @echo off
-python cloudtower/game.py
+python skytower/game.py

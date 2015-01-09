@@ -1,1 +1,1 @@
-python cloudtower/game.py
+python skytower/game.py
