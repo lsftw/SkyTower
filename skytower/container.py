@@ -6,7 +6,6 @@ class Container:
 	gravity = 500 # accelerationY
 	_boundaries = None
 	camera = None
-	followedEntity = None
 	def __init__(self, width, height):
 		self.entities = []
 		self._boundaries = (0, width, -100000, 0)
@@ -16,13 +15,12 @@ class Container:
 		self.entities.append(entity)
 		entity.container = self
 	def cameraFollow(self, entity):
-		self.followedEntity = entity
+		self.camera.followedEntity = entity
 	# called every frame
 	def update(self, deltaSeconds):
 		for e in iter(self.entities):
 			e.update(deltaSeconds)
-		if self.followedEntity is not None:
-			self.camera.update(self.followedEntity)
+		self.camera.update()
 	def draw(self, screen):
 		for e in iter(self.entities): # TODO don't draw out of camera bounds entities
 			e.draw(screen)
@@ -33,7 +31,7 @@ class Container:
 		return self._boundaries[1]
 	def getTop(self):
 		return self._boundaries[2]
-	def getBottom(self): # TODO later set to 0, after camera centering implemented
+	def getBottom(self):
 		return self._boundaries[3]
 	def isTooFarLeft(self, entity):
 		return entity.getLeft() < self.getLeft()
