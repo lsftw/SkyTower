@@ -1,5 +1,5 @@
 # Contains Entity objects, update() draw() repeat
-from camera import *
+from verticalcamera import *
 
 class Container:
 	entities = None
@@ -10,7 +10,7 @@ class Container:
 	def __init__(self, width, height):
 		self.entities = []
 		self._boundaries = (0, 0, width, height)
-		self.camera = Camera(width, height)
+		self.camera = VerticalCamera(width, height)
 	# Entity interaction
 	def addEntity(self, entity):
 		self.entities.append(entity)
@@ -31,7 +31,7 @@ class Container:
 		return self._boundaries[0]
 	def getRight(self):
 		return self._boundaries[2]
-	def getTop(self): # TODO later remove top boundary
+	def getTop(self):
 		return self._boundaries[1]
 	def getBottom(self): # TODO later set to 0, after camera centering implemented
 		return self._boundaries[3]

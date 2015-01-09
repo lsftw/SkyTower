@@ -41,7 +41,6 @@ class Entity:
 		return self.getBottom() >= other.getTop()
 	# Hitbox modifications: all return old hitbox
 	def getDisplayedHitbox(self): # use these position & dimensions for display on screen
-		#print(self._hitbox, self.container.camera.view(self._hitbox))
 		return self.container.camera.view(self._hitbox)
 	def updateHitbox(self):
 		oldHitbox = self._hitbox.copy()
@@ -115,4 +114,4 @@ class Entity:
 	def update(self, deltaSeconds):
 		self.updatePhysics(deltaSeconds)
 	def draw(self, screen):
-		pygame.draw.rect(screen, (128, 128, 128), self.getDisplayedHitbox())
+		pygame.draw.rect(screen, (128, 255, 128), self.getDisplayedHitbox())

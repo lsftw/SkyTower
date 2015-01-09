@@ -8,8 +8,9 @@ from container import *
 from entity import *
 from player import *
 
+windowSize = (800, 600)
 running = True
-gameState = GameState()
+gameState = GameState(windowSize)
 
 def userQuit():
 	global running
@@ -64,14 +65,13 @@ def gameLoop(screen):
 
 def initDisplay():
 	pygame.init()
-	window_size = (800, 600)
-	screen = pygame.display.set_mode(window_size)
+	screen = pygame.display.set_mode(windowSize)
 	pygame.display.set_caption("Sky Tower")
 	return screen
 
 def initGame():
-	gameState.addPlayer(Player(50, 50, 20, 60))
-	other = Entity(400, 300, 10, 10)
+	gameState.addPlayer(Player(50, -60, 20, 60))
+	other = Entity(400, -300, 10, 10)
 	other.gravity = False
 	gameState.addEntity(other)
 

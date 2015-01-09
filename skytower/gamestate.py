@@ -7,8 +7,8 @@ class GameState:
 	player = None
 	startTime = 0
 	lastTickTime = startTime
-	def __init__(self):
-		self.container = Container(800, 600)
+	def __init__(self, (width, height)):
+		self.container = Container(width, height)
 		self.startTime = time.time()
 		self.lastTickTime = self.startTime
 	def addPlayer(self, player): # players have keyboard controls and are followed by the camera
