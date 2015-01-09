@@ -5,10 +5,9 @@ from camera import *
 class VerticalCamera(Camera):
 	def update(self, followedEntity): # updates camera position to follow an entity
 		self.viewBounds = self.moveVerticallyWithFollowed(followedEntity._hitbox)
-		# print(self.viewBounds)
 	def moveVerticallyWithFollowed(self, followedRect):
-		l, _, w, h = self.viewBounds
-		BOTTOM = h
-		t = -followedRect.top + h / 2
-		t = max(BOTTOM, t)
-		return Rect(l, t, w, h)
+		l, _, w, height = self.viewBounds # only top & height are relevant
+		BOTTOM = height
+		top = -followedRect.top + height / 2
+		top = max(BOTTOM, top)
+		return Rect(l, top, w, height)
