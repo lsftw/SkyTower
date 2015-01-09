@@ -5,7 +5,7 @@ from entity import *
 
 class Player(Entity):
 	movementSpeed = 250 # pixels per second
-	def tick(self, deltaSeconds):
+	def handleKeys(self, deltaSeconds):
 		keysPressed = pygame.key.get_pressed()
 		if keysPressed[pygame.K_LEFT]:
 			self.setVelocityX(-self.movementSpeed)
@@ -13,6 +13,8 @@ class Player(Entity):
 			self.setVelocityX(self.movementSpeed)
 		else:
 			self.setVelocityX(0)
+	def tick(self, deltaSeconds):
+		self.handleKeys(deltaSeconds)
 		Entity.tick(self, deltaSeconds)
 	def handleKeyUp(self, key):
 		pass
