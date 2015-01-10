@@ -121,7 +121,7 @@ class Entity:
 				invalidHitbox = curHitbox
 			else:
 				validHitbox = curHitbox
-		self._hitbox = validHitbox
+		self.setPosition(validHitbox.left, validHitbox.top) # must ensure _exactPositions are also changed
 	def handlePlatformCollision(self, selfOldHitbox, entity): # TODO platform collision check
 		pass
 	def handleObstacleCollision(self, selfOldHitbox, entity):
