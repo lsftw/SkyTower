@@ -10,7 +10,8 @@ class Entity:
 	velocities = None
 	container = None
 	gravity = True
-	canJumpThrough = False # platforms can be jumped through from below
+	isPlatform = False # platforms can be jumped through from below, but can't fall through
+	isObstacle = False # obstacles have total collision
 	def __init__(self, x, y, width, height):
 		self._exactPositions = [x, y]
 		self._hitbox = Rect(x, y, width, height)
@@ -98,14 +99,43 @@ class Entity:
 		oldHitbox = self.move(self.velocities[0] * deltaSeconds, self.velocities[1] * deltaSeconds)
 		self.preventMovingOutOfBounds()
 		return oldHitbox
-	def handleCollision(self, selfOldHitbox, other):
-		# TODO collision check
+	@staticmethod
+	def hitboxBetween(hitbox1, hitbox2): # assumes hitboxes are of same size
+		middleX = (hitbox1.left + hitbox2.left) / 2
+		middleY = (hitbox1.top + hitbox2.top) / 2
+		return Rect(middleX, middleY, hitbox1.width, hitbox1.height)
+	@staticmethod
+	def hitboxEqual(hitbox1, hitbox2):
+		return hitbox1.left == hitbox2.left and hitbox1.top == hitbox2.top and hitbox1.width == hitbox2.width and hitbox1.height == hitbox2.height
+	@staticmethod
+	def noMoreHitboxesBetween(hitbox1, hitbox2):
+		middleHitbox = Entity.hitboxBetween(hitbox1, hitbox2)
+		return Entity.hitboxEqual(middleHitbox, hitbox1) or Entity.hitboxEqual(middleHitbox, hitbox2)
+	def interpolateHitbox(self, selfOldHitbox, collisionHitbox):
+		validHitbox = selfOldHitbox.copy() # doesn't collide
+		invalidHitbox = self._hitbox.copy() # collides
+		# binary interpolation search between validHitbox & invalidHitbox for the first hitbox that doesn't collide
+		while not self.noMoreHitboxesBetween(validHitbox, invalidHitbox):
+			curHitbox = self.hitboxBetween(validHitbox, invalidHitbox)
+			if curHitbox.colliderect(collisionHitbox):
+				invalidHitbox = curHitbox
+			else:
+				validHitbox = curHitbox
+		self._hitbox = validHitbox
+	def handlePlatformCollision(self, selfOldHitbox, entity): # TODO platform collision check
 		pass
+	def handleObstacleCollision(self, selfOldHitbox, entity):
+		willCollide = self._hitbox.colliderect(entity._hitbox)
+		if willCollide: # interpolate curHitbox w/ oldHitbox
+			self.interpolateHitbox(selfOldHitbox, entity._hitbox)
 	def handleAllCollisions(self, selfOldHitbox):
 		if self.container is not None:
 			for entity in iter(self.container.entities):
 				if entity is not self:
-					self.handleCollision(selfOldHitbox, entity)
+					if entity.isPlatform:
+						self.handlePlatformCollision(selfOldHitbox, entity)
+					elif entity.isObstacle:
+						self.handleObstacleCollision(selfOldHitbox, entity)
 	def updatePhysics(self, deltaSeconds):
 		self.updateVelocities(deltaSeconds)
 		oldHitbox = self.updatePosition(deltaSeconds)
