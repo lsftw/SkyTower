@@ -55,7 +55,7 @@ def initDisplay():
 
 def initGame():
 	gameState.addPlayer(Player(50, -60, 20, 60))
-	other = Entity(400, -300, 50, 50)
+	other = Entity(200, -200, 50, 50)
 	other.gravity = False
 	other.isObstacle = True
 	gameState.addEntity(other)

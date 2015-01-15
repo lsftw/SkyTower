@@ -111,17 +111,71 @@ class Entity:
 	def noMoreHitboxesBetween(hitbox1, hitbox2):
 		middleHitbox = Entity.hitboxBetween(hitbox1, hitbox2)
 		return Entity.hitboxEqual(middleHitbox, hitbox1) or Entity.hitboxEqual(middleHitbox, hitbox2)
-	def interpolateHitbox(self, selfOldHitbox, collisionHitbox):
-		validHitbox = selfOldHitbox.copy() # doesn't collide
-		invalidHitbox = self._hitbox.copy() # collides
+	# TODO reduce duplicated code for single-coordinate interpolation functions
+	# TODO don't use sequential interpolation for single-coordinate, use binary interpolation
+	@staticmethod
+	def interpolateHitboxOnX(oldHitbox, newHitbox, collisionHitbox): # might fail and return None
+		# while newHitbox.x != oldHitbox.x, newHitbox.x move 1px towards oldHitbox.x
+		signNum = lambda num: cmp(num, 0)
+		deltaX = signNum(oldHitbox.x - newHitbox.x) # interpolate hitbox 1px at a time
+		if signNum(deltaX) == 0:
+			return None
+		interpolatedHitbox = newHitbox.copy()
+		while interpolatedHitbox.x != oldHitbox.x and interpolatedHitbox.colliderect(collisionHitbox):
+			interpolatedHitbox.x += deltaX
+		if interpolatedHitbox.colliderect(collisionHitbox):
+			return None
+		else:
+			return interpolatedHitbox
+	@staticmethod
+	def interpolateHitboxOnY(oldHitbox, newHitbox, collisionHitbox): # might fail and return None
+		# while newHitbox.y != oldHitbox.y, newHitbox.y move 1px towards oldHitbox.y
+		signNum = lambda num: cmp(num, 0)
+		deltaY = signNum(oldHitbox.y - newHitbox.y) # interpolate hitbox 1px at a time
+		if signNum(deltaY) == 0:
+			return None
+		interpolatedHitbox = newHitbox.copy()
+		while interpolatedHitbox.y != oldHitbox.y and interpolatedHitbox.colliderect(collisionHitbox):
+			interpolatedHitbox.y += deltaY
+		if interpolatedHitbox.colliderect(collisionHitbox):
+			return None
+		else:
+			return interpolatedHitbox
+	@staticmethod
+	def interpolateHitboxOnXY(oldHitbox, newHitbox, collisionHitbox): # will always return valid hitbox
+		validHitbox = oldHitbox.copy() # doesn't collide
+		invalidHitbox = newHitbox.copy() # collides
 		# binary interpolation search between validHitbox & invalidHitbox for the first hitbox that doesn't collide
-		while not self.noMoreHitboxesBetween(validHitbox, invalidHitbox):
-			curHitbox = self.hitboxBetween(validHitbox, invalidHitbox)
+		while not Entity.noMoreHitboxesBetween(validHitbox, invalidHitbox):
+			curHitbox = Entity.hitboxBetween(validHitbox, invalidHitbox)
 			if curHitbox.colliderect(collisionHitbox):
 				invalidHitbox = curHitbox
 			else:
 				validHitbox = curHitbox
-		self.setPosition(validHitbox.left, validHitbox.top) # must ensure _exactPositions are also changed
+		return validHitbox
+	# find the latest hitbox that doesn't collide by interpolating between old and new hitbox
+	def interpolateHitbox(self, selfOldHitbox, collisionHitbox):
+		interpolateHitboxX = Entity.interpolateHitboxOnX(selfOldHitbox, self._hitbox, collisionHitbox)
+		interpolateHitboxY = Entity.interpolateHitboxOnY(selfOldHitbox, self._hitbox, collisionHitbox)
+		if interpolateHitboxX is None:
+			interpolateHitbox = interpolateHitboxY
+		elif interpolateHitboxY is None:
+			interpolateHitbox = interpolateHitboxX
+		else:
+			interpolateHitbox = Entity.interpolateHitboxOnXY(selfOldHitbox, self._hitbox, collisionHitbox)
+		self.setPosition(interpolateHitbox.left, interpolateHitbox.top)
+		# # TODO interpolate X & Y separately instead of together as XY, pick the one that succeeds
+		# # TODO if both succeed, then interpolate on XY and return that
+		# validHitbox = selfOldHitbox.copy() # doesn't collide
+		# invalidHitbox = self._hitbox.copy() # collides
+		# # binary interpolation search between validHitbox & invalidHitbox for the first hitbox that doesn't collide
+		# while not self.noMoreHitboxesBetween(validHitbox, invalidHitbox):
+			# curHitbox = self.hitboxBetween(validHitbox, invalidHitbox)
+			# if curHitbox.colliderect(collisionHitbox):
+				# invalidHitbox = curHitbox
+			# else:
+				# validHitbox = curHitbox
+		# self.setPosition(validHitbox.left, validHitbox.top) # must ensure _exactPositions are also changed
 	def handlePlatformCollision(self, selfOldHitbox, entity): # TODO platform collision check
 		pass
 	def handleObstacleCollision(self, selfOldHitbox, entity):
