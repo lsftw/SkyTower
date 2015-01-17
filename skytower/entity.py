@@ -2,14 +2,17 @@
 import pygame
 from pygame import Rect
 
-# TODO split up functionality into separate classes
+import physics
 
 class Entity:
 	_exactPositions = None # Uses floats to handle variable-deltaSecond frames, Rect is integer only
 	_hitbox = None # should match exactPositions for (x, y), but using integers instead
+	oldHitbox = None # hitbox last frame, used for resolving collisions
 	velocities = None
 	container = None
 	gravity = True
+	# TODO enum field for collision type
+	collisionType = physics.CollisionType.COLLIDER
 	isPlatform = False # platforms can be jumped through from below, but can't fall through
 	isObstacle = False # obstacles have total collision
 	def __init__(self, x, y, width, height):
@@ -99,89 +102,14 @@ class Entity:
 		oldHitbox = self.move(self.velocities[0] * deltaSeconds, self.velocities[1] * deltaSeconds)
 		self.preventMovingOutOfBounds()
 		return oldHitbox
-	@staticmethod
-	def hitboxBetween(hitbox1, hitbox2): # assumes hitboxes are of same size
-		middleX = (hitbox1.left + hitbox2.left) / 2
-		middleY = (hitbox1.top + hitbox2.top) / 2
-		return Rect(middleX, middleY, hitbox1.width, hitbox1.height)
-	@staticmethod
-	def hitboxEqual(hitbox1, hitbox2):
-		return hitbox1.left == hitbox2.left and hitbox1.top == hitbox2.top and hitbox1.width == hitbox2.width and hitbox1.height == hitbox2.height
-	@staticmethod
-	def noMoreHitboxesBetween(hitbox1, hitbox2):
-		middleHitbox = Entity.hitboxBetween(hitbox1, hitbox2)
-		return Entity.hitboxEqual(middleHitbox, hitbox1) or Entity.hitboxEqual(middleHitbox, hitbox2)
-	# TODO reduce duplicated code for single-coordinate interpolation functions
-	# TODO don't use sequential interpolation for single-coordinate, use binary interpolation
-	@staticmethod
-	def interpolateHitboxOnX(oldHitbox, newHitbox, collisionHitbox): # might fail and return None
-		# while newHitbox.x != oldHitbox.x, newHitbox.x move 1px towards oldHitbox.x
-		signNum = lambda num: cmp(num, 0)
-		deltaX = signNum(oldHitbox.x - newHitbox.x) # interpolate hitbox 1px at a time
-		if signNum(deltaX) == 0:
-			return None
-		interpolatedHitbox = newHitbox.copy()
-		while interpolatedHitbox.x != oldHitbox.x and interpolatedHitbox.colliderect(collisionHitbox):
-			interpolatedHitbox.x += deltaX
-		if interpolatedHitbox.colliderect(collisionHitbox):
-			return None
-		else:
-			return interpolatedHitbox
-	@staticmethod
-	def interpolateHitboxOnY(oldHitbox, newHitbox, collisionHitbox): # might fail and return None
-		# while newHitbox.y != oldHitbox.y, newHitbox.y move 1px towards oldHitbox.y
-		signNum = lambda num: cmp(num, 0)
-		deltaY = signNum(oldHitbox.y - newHitbox.y) # interpolate hitbox 1px at a time
-		if signNum(deltaY) == 0:
-			return None
-		interpolatedHitbox = newHitbox.copy()
-		while interpolatedHitbox.y != oldHitbox.y and interpolatedHitbox.colliderect(collisionHitbox):
-			interpolatedHitbox.y += deltaY
-		if interpolatedHitbox.colliderect(collisionHitbox):
-			return None
-		else:
-			return interpolatedHitbox
-	@staticmethod
-	def interpolateHitboxOnXY(oldHitbox, newHitbox, collisionHitbox): # will always return valid hitbox
-		validHitbox = oldHitbox.copy() # doesn't collide
-		invalidHitbox = newHitbox.copy() # collides
-		# binary interpolation search between validHitbox & invalidHitbox for the first hitbox that doesn't collide
-		while not Entity.noMoreHitboxesBetween(validHitbox, invalidHitbox):
-			curHitbox = Entity.hitboxBetween(validHitbox, invalidHitbox)
-			if curHitbox.colliderect(collisionHitbox):
-				invalidHitbox = curHitbox
-			else:
-				validHitbox = curHitbox
-		return validHitbox
-	# find the latest hitbox that doesn't collide by interpolating between old and new hitbox
-	def interpolateHitbox(self, selfOldHitbox, collisionHitbox):
-		interpolateHitboxX = Entity.interpolateHitboxOnX(selfOldHitbox, self._hitbox, collisionHitbox)
-		interpolateHitboxY = Entity.interpolateHitboxOnY(selfOldHitbox, self._hitbox, collisionHitbox)
-		if interpolateHitboxX is None:
-			interpolateHitbox = interpolateHitboxY
-		elif interpolateHitboxY is None:
-			interpolateHitbox = interpolateHitboxX
-		else:
-			interpolateHitbox = Entity.interpolateHitboxOnXY(selfOldHitbox, self._hitbox, collisionHitbox)
-		self.setPosition(interpolateHitbox.left, interpolateHitbox.top)
-	def handlePlatformCollision(self, selfOldHitbox, entity): # TODO platform collision check
-		pass
-	def handleObstacleCollision(self, selfOldHitbox, entity):
-		willCollide = self._hitbox.colliderect(entity._hitbox)
-		if willCollide: # interpolate curHitbox w/ oldHitbox
-			self.interpolateHitbox(selfOldHitbox, entity._hitbox)
-	def handleAllCollisions(self, selfOldHitbox):
+	def handleAllCollisions(self):
 		if self.container is not None:
 			for entity in iter(self.container.entities):
-				if entity is not self:
-					if entity.isPlatform:
-						self.handlePlatformCollision(selfOldHitbox, entity)
-					elif entity.isObstacle:
-						self.handleObstacleCollision(selfOldHitbox, entity)
+				physics.handleCollision(self, entity)
 	def updatePhysics(self, deltaSeconds):
 		self.updateVelocities(deltaSeconds)
-		oldHitbox = self.updatePosition(deltaSeconds)
-		self.handleAllCollisions(oldHitbox)
+		self.oldHitbox = self.updatePosition(deltaSeconds)
+		self.handleAllCollisions()
 	# called by container
 	def update(self, deltaSeconds):
 		self.updatePhysics(deltaSeconds)
