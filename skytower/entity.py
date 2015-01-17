@@ -33,10 +33,10 @@ class Entity:
 		centerX = (self.getLeft() + self.getRight()) / 2
 		centerY = (self.getTop() + self.getBottom()) / 2
 		return (centerX, centerY)
-	def setVelocityX(self, velocity):
-		self.velocities[0] = velocity
-	def setVelocityY(self, velocity):
-		self.velocities[1] = velocity
+	def setVelocityX(self, pixelsPerSecond):
+		self.velocities[0] = pixelsPerSecond
+	def setVelocityY(self, pixelsPerSecond):
+		self.velocities[1] = pixelsPerSecond
 	# Interactions with other Entity instances
 	def isAboveEntity(self, other):
 		return self.getBottom() >= other.getTop()
@@ -164,18 +164,6 @@ class Entity:
 		else:
 			interpolateHitbox = Entity.interpolateHitboxOnXY(selfOldHitbox, self._hitbox, collisionHitbox)
 		self.setPosition(interpolateHitbox.left, interpolateHitbox.top)
-		# # TODO interpolate X & Y separately instead of together as XY, pick the one that succeeds
-		# # TODO if both succeed, then interpolate on XY and return that
-		# validHitbox = selfOldHitbox.copy() # doesn't collide
-		# invalidHitbox = self._hitbox.copy() # collides
-		# # binary interpolation search between validHitbox & invalidHitbox for the first hitbox that doesn't collide
-		# while not self.noMoreHitboxesBetween(validHitbox, invalidHitbox):
-			# curHitbox = self.hitboxBetween(validHitbox, invalidHitbox)
-			# if curHitbox.colliderect(collisionHitbox):
-				# invalidHitbox = curHitbox
-			# else:
-				# validHitbox = curHitbox
-		# self.setPosition(validHitbox.left, validHitbox.top) # must ensure _exactPositions are also changed
 	def handlePlatformCollision(self, selfOldHitbox, entity): # TODO platform collision check
 		pass
 	def handleObstacleCollision(self, selfOldHitbox, entity):

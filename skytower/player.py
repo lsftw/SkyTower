@@ -4,7 +4,8 @@ import pygame
 from entity import *
 
 class Player(Entity):
-	movementSpeed = 250 # pixels per second
+	# speeds in pixels per second
+	movementSpeed = 250
 	jumpSpeed = 500
 	def tryToJump(self):
 		if not self.isMidair():
