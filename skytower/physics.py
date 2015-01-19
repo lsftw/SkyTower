@@ -14,12 +14,12 @@ def resolvePlatformCollision(collider, platform): # TODO platform collision chec
 CollisionType = Enum('CollisionType', 'COLLIDER COLLIDEABLE_OBSTACLE COLLIDEABLE_PLATFORM')
 COLLISION_RESOLUTION_FUNCTIONS = {
 	# CollisionType.COLLIDER: (lambda x, y: None),
-	CollisionType.COLLIDEABLE_OBSTACLE: resolveObstacleCollision,
-	CollisionType.COLLIDEABLE_PLATFORM: resolvePlatformCollision
+	CollisionType.COLLIDEABLE_OBSTACLE: resolveObstacleCollision, # obstacles have collision enabled for all directions
+	CollisionType.COLLIDEABLE_PLATFORM: resolvePlatformCollision # platforms can be jumped through from below, but can't fall through
 }
 
 def isCollideable(entity):
-	return entity.isObstacle or entity.isPlatform
+	return entity.collisionType is CollisionType.COLLIDEABLE_OBSTACLE or entity.collisionType is CollisionType.COLLIDEABLE_PLATFORM
 
 def willCollide(entity1, entity2):
 	return entity1._hitbox.colliderect(entity2._hitbox)

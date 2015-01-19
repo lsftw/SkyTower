@@ -11,10 +11,7 @@ class Entity:
 	velocities = None
 	container = None
 	gravity = True
-	# TODO enum field for collision type
 	collisionType = physics.CollisionType.COLLIDER
-	isPlatform = False # platforms can be jumped through from below, but can't fall through
-	isObstacle = False # obstacles have total collision
 	def __init__(self, x, y, width, height):
 		self._exactPositions = [x, y]
 		self._hitbox = Rect(x, y, width, height)
