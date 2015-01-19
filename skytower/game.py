@@ -58,7 +58,10 @@ def initGame():
 	other = Entity(200, -200, 50, 50)
 	other.gravity = False
 	other.collisionType = physics.CollisionType.COLLIDEABLE_OBSTACLE
-	other.isObstacle = True
+	gameState.addEntity(other)
+	other = Entity(400, -200, 200, 50)
+	other.gravity = False
+	other.collisionType = physics.CollisionType.COLLIDEABLE_OBSTACLE
 	gameState.addEntity(other)
 
 def startGame():

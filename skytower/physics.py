@@ -71,31 +71,36 @@ def interpolateHitbox(oldHitbox, newHitbox, collisionHitbox):
 	return interpolatedHitbox
 
 # TODO reduce duplicated code for single-coordinate interpolation functions
-# TODO don't use sequential interpolation for single-coordinate, use binary interpolation (like XY interpolation function)
 
 def interpolateHitboxOnX(oldHitbox, newHitbox, collisionHitbox): # might fail and return None
-	# while newHitbox.x != oldHitbox.x, newHitbox.x move 1px towards oldHitbox.x
-	signNum = lambda num: cmp(num, 0)
-	deltaX = signNum(oldHitbox.x - newHitbox.x) # interpolate hitbox 1px at a time
-	if signNum(deltaX) == 0:
-		return None
+	# find the latest hitbox that doesn't collide, changing only the x-coordinate
+	validX = oldHitbox.x
+	invalidX = newHitbox.x
 	interpolatedHitbox = newHitbox.copy()
-	while interpolatedHitbox.x != oldHitbox.x and interpolatedHitbox.colliderect(collisionHitbox):
-		interpolatedHitbox.x += deltaX
+	while abs(validX - invalidX) > 1:
+		interpolatedHitbox.x = (validX + invalidX) / 2
+		if interpolatedHitbox.colliderect(collisionHitbox):
+			invalidX = interpolatedHitbox.x
+		else:
+			validX = interpolatedHitbox.x
+	interpolatedHitbox.x = validX
 	if interpolatedHitbox.colliderect(collisionHitbox):
 		return None
 	else:
 		return interpolatedHitbox
 
 def interpolateHitboxOnY(oldHitbox, newHitbox, collisionHitbox): # might fail and return None
-	# while newHitbox.y != oldHitbox.y, newHitbox.y move 1px towards oldHitbox.y
-	signNum = lambda num: cmp(num, 0)
-	deltaY = signNum(oldHitbox.y - newHitbox.y) # interpolate hitbox 1px at a time
-	if signNum(deltaY) == 0:
-		return None
+	# find the latest hitbox that doesn't collide, changing only the y-coordinate
+	validY = oldHitbox.y
+	invalidY = newHitbox.y
 	interpolatedHitbox = newHitbox.copy()
-	while interpolatedHitbox.y != oldHitbox.y and interpolatedHitbox.colliderect(collisionHitbox):
-		interpolatedHitbox.y += deltaY
+	while abs(validY - invalidY) > 1:
+		interpolatedHitbox.y = (validY + invalidY) / 2
+		if interpolatedHitbox.colliderect(collisionHitbox):
+			invalidY = interpolatedHitbox.y
+		else:
+			validY = interpolatedHitbox.y
+	interpolatedHitbox.y = validY
 	if interpolatedHitbox.colliderect(collisionHitbox):
 		return None
 	else:
@@ -104,7 +109,7 @@ def interpolateHitboxOnY(oldHitbox, newHitbox, collisionHitbox): # might fail an
 def interpolateHitboxOnXY(oldHitbox, newHitbox, collisionHitbox): # will always return valid hitbox
 	validHitbox = oldHitbox.copy() # doesn't collide
 	invalidHitbox = newHitbox.copy() # collides
-	# binary interpolation search between validHitbox & invalidHitbox for the first hitbox that doesn't collide
+	# binary interpolation search between validHitbox & invalidHitbox for the latest hitbox that doesn't collide
 	while not noMoreHitboxesBetween(validHitbox, invalidHitbox):
 		curHitbox = hitboxBetween(validHitbox, invalidHitbox)
 		if curHitbox.colliderect(collisionHitbox):
