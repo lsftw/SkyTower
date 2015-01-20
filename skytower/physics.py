@@ -45,18 +45,6 @@ def handleCollision(entity1, entity2):
 
 # Hitbox resolution/interpolation functions
 
-def hitboxBetween(hitbox1, hitbox2): # assumes hitboxes are of same size
-	middleX = (hitbox1.left + hitbox2.left) / 2
-	middleY = (hitbox1.top + hitbox2.top) / 2
-	return Rect(middleX, middleY, hitbox1.width, hitbox1.height)
-
-def hitboxEqual(hitbox1, hitbox2):
-	return hitbox1.left == hitbox2.left and hitbox1.top == hitbox2.top and hitbox1.width == hitbox2.width and hitbox1.height == hitbox2.height
-
-def noMoreHitboxesBetween(hitbox1, hitbox2):
-	middleHitbox = hitboxBetween(hitbox1, hitbox2)
-	return hitboxEqual(middleHitbox, hitbox1) or hitboxEqual(middleHitbox, hitbox2)
-
 # find the latest hitbox that doesn't collide by interpolating between old and new hitbox
 def interpolateHitbox(oldHitbox, newHitbox, collisionHitbox):
 	interpolatedHitboxX = interpolateHitboxOnX(oldHitbox, newHitbox, collisionHitbox)
@@ -70,23 +58,41 @@ def interpolateHitbox(oldHitbox, newHitbox, collisionHitbox):
 		interpolatedHitbox = interpolateHitboxOnXY(oldHitbox, newHitbox, collisionHitbox)
 	return interpolatedHitbox
 
-# TODO reduce duplicated code for single-coordinate interpolation functions
+def interpolate(validState, invalidState, interpolateFunction, validationFunction): # find the latest hitbox that doesn't collide
+	middleState = interpolateFunction(validState, invalidState)
+	while middleState is not None: # while there exist intermediate states between validState and invalidState
+		middleIsValid = validationFunction(middleState)
+		if middleIsValid:
+			validState = middleState
+		else:
+			invalidState = middleState
+		middleState = interpolateFunction(validState, invalidState)
+	if validationFunction(validState):
+		return validState
+	else:
+		return None
+
+def coordinateBetween(validCoordinate, invalidCoordinate):
+	middleCoordinate = int((validCoordinate + invalidCoordinate) / 2)
+	isNewCoordinate = middleCoordinate != validCoordinate and middleCoordinate != invalidCoordinate
+	if isNewCoordinate:
+		return middleCoordinate
+	else:
+		return None
 
 def interpolateHitboxOnX(oldHitbox, newHitbox, collisionHitbox): # might fail and return None
 	# find the latest hitbox that doesn't collide, changing only the x-coordinate
 	validX = oldHitbox.x
 	invalidX = newHitbox.x
 	interpolatedHitbox = newHitbox.copy()
-	while abs(validX - invalidX) > 1:
-		interpolatedHitbox.x = (validX + invalidX) / 2
-		if interpolatedHitbox.colliderect(collisionHitbox):
-			invalidX = interpolatedHitbox.x
-		else:
-			validX = interpolatedHitbox.x
-	interpolatedHitbox.x = validX
-	if interpolatedHitbox.colliderect(collisionHitbox):
+	def validationFunction(candidateX):
+		interpolatedHitbox.x = candidateX
+		return not interpolatedHitbox.colliderect(collisionHitbox)
+	interpolatedX = interpolate(validX, invalidX, coordinateBetween, validationFunction)
+	if interpolatedX is None:
 		return None
 	else:
+		interpolatedHitbox.x = interpolatedX
 		return interpolatedHitbox
 
 def interpolateHitboxOnY(oldHitbox, newHitbox, collisionHitbox): # might fail and return None
@@ -94,26 +100,25 @@ def interpolateHitboxOnY(oldHitbox, newHitbox, collisionHitbox): # might fail an
 	validY = oldHitbox.y
 	invalidY = newHitbox.y
 	interpolatedHitbox = newHitbox.copy()
-	while abs(validY - invalidY) > 1:
-		interpolatedHitbox.y = (validY + invalidY) / 2
-		if interpolatedHitbox.colliderect(collisionHitbox):
-			invalidY = interpolatedHitbox.y
-		else:
-			validY = interpolatedHitbox.y
-	interpolatedHitbox.y = validY
-	if interpolatedHitbox.colliderect(collisionHitbox):
+	def validationFunction(candidateY):
+		interpolatedHitbox.y = candidateY
+		return not interpolatedHitbox.colliderect(collisionHitbox)
+	interpolatedY = interpolate(validY, invalidY, coordinateBetween, validationFunction)
+	if interpolatedY is None:
 		return None
 	else:
+		interpolatedHitbox.y = interpolatedY
 		return interpolatedHitbox
 
+def hitboxBetween(hitbox1, hitbox2): # assumes hitboxes are of same size
+	middleX = (hitbox1.left + hitbox2.left) / 2
+	middleY = (hitbox1.top + hitbox2.top) / 2
+	middleHitbox = Rect(middleX, middleY, hitbox1.width, hitbox1.height)
+	if middleHitbox.left != hitbox1.left and middleHitbox.left != hitbox2.left and middleHitbox.top != hitbox1.top and middleHitbox.top != hitbox2.top:
+		return middleHitbox
+	else:
+		return None
+
 def interpolateHitboxOnXY(oldHitbox, newHitbox, collisionHitbox): # will always return valid hitbox
-	validHitbox = oldHitbox.copy() # doesn't collide
-	invalidHitbox = newHitbox.copy() # collides
-	# binary interpolation search between validHitbox & invalidHitbox for the latest hitbox that doesn't collide
-	while not noMoreHitboxesBetween(validHitbox, invalidHitbox):
-		curHitbox = hitboxBetween(validHitbox, invalidHitbox)
-		if curHitbox.colliderect(collisionHitbox):
-			invalidHitbox = curHitbox
-		else:
-			validHitbox = curHitbox
-	return validHitbox
+	validationFunction = lambda hitbox: not hitbox.colliderect(collisionHitbox)
+	return interpolate(oldHitbox, newHitbox, hitboxBetween, validationFunction)
