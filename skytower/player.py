@@ -8,17 +8,17 @@ class Player(Entity):
 	maxMovementSpeed = 250
 	maxJumpSpeed = 450
 	staminaCostPerSecondMoving = 100
-	staminaCostPerJump = 200
-	staminaRegenPerSecond = 100
+	staminaCostPerJump = 250
+	staminaRegenPerSecond = 200
 	maxStamina = 1000
 	stamina = maxStamina
 	def staminaPercentage(self):
 		return self.stamina / self.maxStamina
 	def performStaminaAction(self, actionFunction, staminaCost):
+		actionFunction(self.staminaPercentage())
 		self.stamina -= staminaCost
 		if self.stamina < 0:
 			self.stamina = 0
-		actionFunction(self.staminaPercentage())
 	def jump(self, percentageEffect):
 		self.setVelocityY(-self.maxJumpSpeed * percentageEffect)
 	def tryToJump(self):
