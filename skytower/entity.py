@@ -68,12 +68,19 @@ class Entity:
 			return 0
 		# TODO cannot just multiply acceleration, would be less accurate as deltaSeconds increase, pos += .5 * a * t^2 instead?
 		return self.container.gravity * deltaSeconds
+	def isStandingOnCollideable(self):
+		if self.container is not None:
+			for entity in iter(self.container.entities):
+				if physics.isStandingOn(self, entity):
+					return True
+		return False
 	def isTouchingGround(self):
-		return self.getBottom() >= self.container.getBottom() # must have == to work
+		atAbsoluteBottom = self.getBottom() >= self.container.getBottom() # must have == to work
+		return atAbsoluteBottom
 	def isMidair(self):
 		if self.isTouchingGround():
 			return False
-		return True # TODO change once platforms are added
+		return not self.isStandingOnCollideable()
 	def updateVelocities(self, deltaSeconds):
 		if self.isMidair(): # fall
 			gravity = self.getGravity(deltaSeconds)

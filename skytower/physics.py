@@ -43,6 +43,11 @@ def handleCollision(entity1, entity2):
 		except KeyError, e:
 			print('Unhandled collision type:', collideable.collisionType.name)
 
+def isStandingOn(entity1, entity2):
+	isAbove = entity1._hitbox.bottom == entity2._hitbox.top
+	isOn = (entity1._hitbox.left > entity2._hitbox.left and entity1._hitbox.left < entity2._hitbox.right) or (entity1._hitbox.right > entity2._hitbox.left and entity1._hitbox.right < entity2._hitbox.right)
+	return isAbove and isOn
+
 # Hitbox resolution/interpolation functions
 
 # find the latest hitbox that doesn't collide by interpolating between old and new hitbox
