@@ -21,18 +21,28 @@ class Entity:
 		return self._hitbox.width
 	def getHeight(self):
 		return self._hitbox.height
-	def getLeft(self):
+	def getExactLeft(self):
 		return self._exactPositions[0]
-	def getRight(self):
+	def getExactRight(self):
 		return self._exactPositions[0] + self.getWidth()
-	def getTop(self):
+	def getExactTop(self):
 		return self._exactPositions[1]
-	def getBottom(self):
+	def getExactBottom(self):
 		return self._exactPositions[1] + self.getHeight()
-	def getCenter(self):
+	def getLeft(self):
+		return self._hitbox.left
+	def getRight(self):
+		return self._hitbox.right
+	def getTop(self):
+		return self._hitbox.top
+	def getBottom(self):
+		return self._hitbox.bottom
+	def getExactCenter(self):
 		centerX = (self.getLeft() + self.getRight()) / 2
 		centerY = (self.getTop() + self.getBottom()) / 2
 		return (centerX, centerY)
+	def isStationary(self):
+		return self.velocities[0] == 0 and self.velocities[1] == 0
 	def setVelocityX(self, pixelsPerSecond):
 		self.velocities[0] = pixelsPerSecond
 	def setVelocityY(self, pixelsPerSecond):

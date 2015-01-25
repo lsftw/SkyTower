@@ -35,9 +35,20 @@ def handleEvents():
 		if event.type == pygame.KEYUP:
 			handleKeyUp(event.key)
 
+def drawHud(screen):
+	font = pygame.font.SysFont('Arial', 25)
+	textColor = (255, 255, 255)
+	position = (200, 100)
+	if gameState.player is not None:
+		text = 'Stamina: ' + str(gameState.player.stamina)
+	else:
+		text = ''
+	screen.blit(font.render(text, True, textColor), position)
+
 def drawGame(screen):
 	screen.fill(backgroundColor)
 	gameState.draw(screen)
+	drawHud(screen)
 	pygame.display.flip()
 
 def gameLoop(screen):

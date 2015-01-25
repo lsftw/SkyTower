@@ -45,7 +45,7 @@ def handleCollision(entity1, entity2):
 
 def isStandingOn(entity1, entity2):
 	isAbove = entity1._hitbox.bottom == entity2._hitbox.top
-	isOn = (entity1._hitbox.left > entity2._hitbox.left and entity1._hitbox.left < entity2._hitbox.right) or (entity1._hitbox.right > entity2._hitbox.left and entity1._hitbox.right < entity2._hitbox.right)
+	isOn = (entity1.getLeft() > entity2.getLeft() and entity1.getLeft() < entity2.getRight()) or (entity1.getRight() > entity2.getLeft() and entity1.getRight() < entity2.getRight())
 	return isAbove and isOn
 
 # Hitbox resolution/interpolation functions
