@@ -37,13 +37,32 @@ def handleEvents():
 			handleKeyUp(event.key)
 
 def drawHud(screen):
-	font = pygame.font.SysFont('Arial', 25)
+	# font = pygame.font.SysFont('Arial', 25)
+	# textColor = (255, 255, 255)
+	# position = (200, 100)
+	# if gameState.player is not None:
+		# text = 'Stamina: ' + str(int(gameState.player.stamina))
+	# else:
+		# text = ''
+	# screen.blit(font.render(text, True, textColor), position)
+	if gameState.player is not None:
+		displayHealth(screen, gameState.player)
+		displayStamina(screen, gameState.player)
+
+def displayHealth(screen, player):
+	textColor = (255, 255, 255)
+	position = (200, 75)
+	text = 'Health: ' + str(int(player.health))
+	displayText(screen, text, textColor, position)
+
+def displayStamina(screen, player):
 	textColor = (255, 255, 255)
 	position = (200, 100)
-	if gameState.player is not None:
-		text = 'Stamina: ' + str(int(gameState.player.stamina))
-	else:
-		text = ''
+	text = 'Stamina: ' + str(int(player.stamina))
+	displayText(screen, text, textColor, position)
+
+def displayText(screen, text, textColor, position):
+	font = pygame.font.SysFont('Arial', 25)
 	screen.blit(font.render(text, True, textColor), position)
 
 def drawGame(screen):
