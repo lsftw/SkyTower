@@ -26,15 +26,15 @@ class Player(Entity):
 			self.performStaminaAction(self.jump, self.staminaCostPerJump)
 	def handleKeys(self, deltaSeconds):
 		keysPressed = pygame.key.get_pressed()
-		if keysPressed[pygame.K_LEFT]:
+		if keysPressed[pygame.K_LEFT] or keysPressed[pygame.K_a]:
 			self.setVelocityX(-self.maxMovementSpeed)
 			self.slowMovementWhenTired()
-		elif keysPressed[pygame.K_RIGHT]:
+		elif keysPressed[pygame.K_RIGHT] or keysPressed[pygame.K_d]:
 			self.setVelocityX(self.maxMovementSpeed)
 			self.slowMovementWhenTired()
 		else:
 			self.setVelocityX(0)
-		if keysPressed[pygame.K_UP]:
+		if keysPressed[pygame.K_UP] or keysPressed[pygame.K_w]:
 			self.tryToJump()
 	def slowMovementWhenTired(self):
 		self.velocities[0] *= self.staminaPercentage()
