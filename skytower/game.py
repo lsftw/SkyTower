@@ -7,6 +7,7 @@ from gamestate import *
 from container import *
 from entity import *
 from player import *
+from simpleplatformlevel import *
 
 windowSize = (800, 600)
 backgroundColor = 128, 128, 128
@@ -66,11 +67,18 @@ def initDisplay():
 
 def initGame():
 	gameState.addPlayer(Player(50, -60, 20, 60))
-	other = Entity(200, -200, 50, 50)
+	generateLevel()
+
+def generateLevel():
+	generator = SimplePlatformLevel();
+	generator.generateLevel(gameState);
+
+def hardcodedLevel():
+	other = Entity(200, -150, 50, 25)
 	other.gravity = False
 	other.collisionType = physics.CollisionType.COLLIDEABLE_OBSTACLE
 	gameState.addEntity(other)
-	other = Entity(400, -200, 200, 50)
+	other = Entity(400, -150, 200, 25)
 	other.gravity = False
 	other.collisionType = physics.CollisionType.COLLIDEABLE_OBSTACLE
 	gameState.addEntity(other)
