@@ -7,10 +7,10 @@ class Player(Entity):
 	# speeds in pixels per second
 	maxMovementSpeed = 250
 	maxJumpSpeed = 450
-	staminaCostPerSecondMoving = 100
-	staminaCostPerJump = 250
-	staminaRegenPerSecond = 200
-	maxStamina = 1000
+	staminaCostPerSecondMoving = 10
+	staminaCostPerJump = 15
+	staminaRegenPerSecond = 20
+	maxStamina = 100
 	stamina = maxStamina
 	def staminaPercentage(self):
 		return self.stamina / self.maxStamina
